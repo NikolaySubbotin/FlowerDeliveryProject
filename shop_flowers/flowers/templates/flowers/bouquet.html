@@ -1,0 +1,26 @@
+{% extends 'main/layoute.html' %}
+
+
+{% block title %}
+    <title>Букеты</title>
+{% endblock %}
+
+{% block content %}
+
+<h1> Популярные букеты </h1>
+    {% if bouquets %}
+        {% for bouquet in bouquets %}
+            <div class="card", style="width: 15rem;">
+                <img src="{{ bouquet.image.url }}" class="card-img-top">
+                <div class="card-body">
+                    <h5 class="card-title">{{ bouquet.name }}</h5>
+                    <p class="card-text">{{ bouquet.price }}</p>
+                    <a href="#" class="btn btn-primary">Купить</a>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <h4>Нет букетов</h4>
+    {% endif %}
+
+{% endblock %}
