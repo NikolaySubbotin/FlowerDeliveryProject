@@ -44,7 +44,7 @@ ROOT_URLCONF = 'shop_flowers.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'main/templates', BASE_DIR / 'flowers/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
