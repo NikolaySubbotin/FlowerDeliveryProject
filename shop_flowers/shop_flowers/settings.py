@@ -21,6 +21,7 @@ AUTH_USER_MODEL = 'main.CustomUser'
 INSTALLED_APPS = [
     'main',
     'flowers',
+    'shop',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

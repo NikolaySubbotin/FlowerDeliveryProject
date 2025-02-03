@@ -15,7 +15,10 @@
                 </li>
                 {% if user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}">Выйти</a>
+                    <form action="{% url 'logout' %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link nav-link" style="border: none; background: none;">Выйти</button>
+                    </form>
                 </li>
                 {% else %}
                 <li class="nav-item">

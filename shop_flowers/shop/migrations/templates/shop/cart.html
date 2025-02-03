@@ -1,0 +1,28 @@
+{% extends "main/layout.html" %}
+
+{% block content %}
+<h2>Корзина</h2>
+{% if cart.cart_items.all %}
+<table class="table">
+    <tr>
+        <th>Товар</th>
+        <th>Цена</th>
+        <th>Количество</th>
+        <th>Общая стоимость</th>
+        <th>Удалить</th>
+    </tr>
+    {% for item in cart.cart_items.all %}
+    <tr>
+        <td>{{ item.product.name }}</td>
+        <td>{{ item.product.price }} руб.</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.total_price }} руб.</td>
+        <td><a href="{% url 'remove_from_cart' item.id %}" class="btn btn-danger">Удалить</a></td>
+    </tr>
+    {% endfor %}
+</table>
+<p><strong>Итого: {{ cart.total_price }} руб.</strong></p>
+{% else %}
+<p>Корзина пуста.</p>
+{% endif %}
+{% endblock %}
