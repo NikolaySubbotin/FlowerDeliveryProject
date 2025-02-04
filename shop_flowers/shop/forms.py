@@ -6,5 +6,8 @@ class CartAddForm(forms.ModelForm):
         model = CartItem
         fields = ['quantity']
         widgets = {
-            'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'})
+            'quantity': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 1
+            })
         }

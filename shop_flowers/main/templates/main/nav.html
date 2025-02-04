@@ -1,32 +1,65 @@
-<!-- templates/main/nav.html -->
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
     <div class="container">
-        <a class="navbar-brand" href="{% url 'home' %}">Интернет-магазин цветов "Роза"</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <i class="bi bi-flower2"></i> Роза
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a
+                        class="nav-link {% if 'flowers_bouquet' in request.resolver_match.url_name %}active fw-bold{% endif %}"
+                        href="{% url 'flowers_bouquet' %}"
+                    >
+                        Букеты
+                    </a>
+                </li>
+            </ul>
+
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'flowers_bouquet' %}">Букеты</a>
+                    <a
+                        class="nav-link {% if request.resolver_match.url_name == 'cart' %}active fw-bold{% endif %}"
+                        href="{% url 'cart' %}"
+                    >
+                        <i class="bi bi-cart3"></i> Корзина
+                    </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Корзина</a>
-                </li>
+
                 {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <form action="{% url 'logout' %}" method="post" class="d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-link nav-link" style="border: none; background: none;">Выйти</button>
-                    </form>
-                </li>
+                    <li class="nav-item">
+                        <form action="{% url 'logout' %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button
+                                type="submit"
+                                class="nav-link btn btn-link"
+                                style="border:none; padding:0;"
+                            >
+                                <i class="bi bi-box-arrow-right"></i> Выйти
+                            </button>
+                        </form>
+                    </li>
                 {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Войти</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'register' %}">Регистрация</a>
-                </li>
+                    <li class="nav-item">
+                        <a
+                            class="nav-link {% if request.resolver_match.url_name == 'login' %}active fw-bold{% endif %}"
+                            href="{% url 'login' %}"
+                        >
+                            <i class="bi bi-box-arrow-in-right"></i> Войти
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a
+                            class="nav-link {% if request.resolver_match.url_name == 'register' %}active fw-bold{% endif %}"
+                            href="{% url 'register' %}"
+                        >
+                            <i class="bi bi-person-plus"></i> Регистрация
+                        </a>
+                    </li>
                 {% endif %}
             </ul>
         </div>
