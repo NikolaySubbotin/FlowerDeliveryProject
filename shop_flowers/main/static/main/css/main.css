@@ -6,3 +6,9 @@ body {
 h1 {
     color: #d9534f;
 }
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Центрируем карточки */
+}

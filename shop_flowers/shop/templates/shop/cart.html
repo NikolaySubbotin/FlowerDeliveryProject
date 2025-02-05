@@ -63,7 +63,7 @@
                         <h5 class="card-title">Итого:</h5>
                         <p class="fs-4 text-danger">{{ cart.total_price|floatformat:"0" }} руб.</p>
                         <a href="{% url 'create_order' %}" class="btn btn-success btn-lg">
-                            <i class="bi bi-bag-check"></i> Оформить заказ
+                            <i class="bi bi-bag-check"></i> Оформить заказ (Платежная система в разработке.)
                         </a>
                     </div>
                 </div>
@@ -71,7 +71,7 @@
         </div>
     {% else %}
         <div class="alert alert-warning">
-            Ваша корзина пуста. <a href="{% url 'flowers_bouquet' %}">Выбрать букеты</a>
+            Ваша корзина пуста. <a href="{% url 'bouquet_list' %}">Выбрать букеты</a>
         </div>
     {% endif %}
 </div>

@@ -6,19 +6,18 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h1 class="mb-4">Популярные букеты</h1>
+    <h1 class="mb-4 text-center">Популярные букеты</h1>
 
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+    <div class="row justify-content-center"> <!-- Важно: flex + центрирование -->
         {% if bouquets %}
             {% for bouquet in bouquets %}
-            <div class="col">
-                <div class="card h-100 shadow-sm">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 d-flex"> <!-- Гибкие карточки -->
+                <div class="card h-100 shadow-sm w-100">
                     <img
                         src="{{ bouquet.image.url }}"
-                        class="card-img-top"
+                        class="card-img-top img-fluid"
                         alt="{{ bouquet.name }}"
-                        width="300"
-                        height="400"
+                        style="max-height: 250px; object-fit: cover;"
                         loading="lazy"
                     >
                     <div class="card-body d-flex flex-column">
@@ -26,9 +25,9 @@
                         <p class="card-text fs-4 text-danger">{{ bouquet.price|floatformat:"0" }} руб.</p>
                         <div class="mt-auto">
                             {% if user.is_authenticated %}
-                                <a href="{% url 'add_to_cart' bouquet.id %}" class="btn btn-primary">В корзину</a>
+                                <a href="{% url 'add_to_cart' bouquet.id %}" class="btn btn-primary w-100">В корзину</a>
                             {% else %}
-                                <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-warning">Купить</a>
+                                <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-warning w-100">Купить</a>
                             {% endif %}
                         </div>
                     </div>
@@ -36,10 +35,11 @@
             </div>
             {% endfor %}
         {% else %}
-            <div class="alert alert-info col-12">
+            <div class="alert alert-info col-12 text-center">
                 <i class="bi bi-info-circle"></i> Пока нет доступных букетов
             </div>
         {% endif %}
     </div>
 </div>
 {% endblock %}
+
