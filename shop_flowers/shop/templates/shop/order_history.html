@@ -3,41 +3,24 @@
 {% block title %}История заказов{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">История заказов</h2>
-    
-    {% if orders %}
-        <div class="list-group">
-            {% for order in orders %}
-            <div class="list-group-item mb-3 shadow-sm">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5>Заказ №{{ order.id }}</h5>
-                        <small class="text-muted">
-                            {{ order.created_at|date:"d.m.Y H:i" }} 
-                            • Статус: 
-                            <span class="badge 
-                                {% if order.status == 'completed' %}bg-success
-                                {% elif order.status == 'cancelled' %}bg-danger
-                                {% else %}bg-secondary{% endif %}">
-                                {{ order.get_status_display }}
-                            </span>
-                        </small>
-                    </div>
-                    <div class="text-end">
-                        <p class="fs-5 mb-0">{{ order.total_price|floatformat:"0" }} руб.</p>
-                        <a href="#" class="btn btn-outline-primary btn-sm">
-                            <i class="bi bi-info-circle"></i> Подробнее
-                        </a>
-                    </div>
-                </div>
+<h1>История заказов</h1>
+
+{% if orders %}
+    {% for order in orders %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Заказ #{{ order.id }}</h5>
+                <p>Дата: {{ order.created_at }}</p>
+                <p>Статус: <strong>{{ order.get_status_display }}</strong></p>
+                <ul>
+                    {% for product in order.products.all %}
+                        <li>{{ product.name }} - {{ product.price }} руб.</li>
+                    {% endfor %}
+                </ul>
             </div>
-            {% endfor %}
         </div>
-    {% else %}
-        <div class="alert alert-info">
-            У вас пока нет завершенных заказов.
-        </div>
-    {% endif %}
-</div>
+    {% endfor %}
+{% else %}
+    <p>Вы ещё не оформляли заказы.</p>
+{% endif %}
 {% endblock %}

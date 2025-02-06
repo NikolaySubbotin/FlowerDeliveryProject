@@ -9,4 +9,7 @@ urlpatterns = [
     path('orders/', views.order_history, name='order_history'),
     path('orders/<int:order_id>/', views.order_detail, name='order_detail'),
     path('create-order/', views.create_order, name='create_order'),
+    path('checkout/', views.checkout, name='checkout'),
+    path("order-history/", views.order_history, name="order_history"),  # История заказов
+    path("reorder/<int:order_id>/", views.reorder, name="reorder"),  # Повторный заказ
 ]

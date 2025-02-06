@@ -63,7 +63,11 @@
                         <h5 class="card-title">Итого:</h5>
                         <p class="fs-4 text-danger">{{ cart.total_price|floatformat:"0" }} руб.</p>
                         <a href="{% url 'create_order' %}" class="btn btn-success btn-lg">
-                            <i class="bi bi-bag-check"></i> Оформить заказ (Платежная система в разработке.)
+                            {% if cart_items %}
+                                <a href="{% url 'checkout' %}" class="btn btn-success">Оформить заказ</a>
+                            {% else %}
+                                <button class="btn btn-secondary" disabled>Корзина пуста</button>
+                            {% endif %}
                         </a>
                     </div>
                 </div>
