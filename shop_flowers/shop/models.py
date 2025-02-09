@@ -97,25 +97,24 @@ class Product(models.Model):
 
 class Order(models.Model):
     STATUS_CHOICES = [
-        ('pending', 'Ожидание'),
+        ('pending', 'Ожидает оплаты'),
+        ('processing', 'Обрабатывается'),
         ('completed', 'Завершен'),
         ('cancelled', 'Отменен'),
     ]
-
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    products = models.ManyToManyField(Bouquet, through='OrderItem')  # Привязка к букетам
-    status = models.CharField(max_length=50, choices=[('pending', 'Pending'), ('completed', 'Completed')])
-    delivery_address = models.CharField(max_length=255)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    delivery_address = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Заказ {self.id} от {self.user}"
+        return f"Заказ #{self.id} - {self.user.username}"
 
-
-class OrderItem(models.Model):  #  Промежуточная модель между заказами и товарами
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)  #  Добавлен ForeignKey к Order
-    bouquet = models.ForeignKey(Bouquet, on_delete=models.CASCADE)  #  Добавлен ForeignKey к Bouquet
-    quantity = models.PositiveIntegerField(default=1)  # Можно добавить количество товаров
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Bouquet, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
 
     def __str__(self):
-        return f"{self.bouquet.name} x {self.quantity} (Заказ {self.order.id})"
+        return f"{self.product.name} x {self.quantity}"

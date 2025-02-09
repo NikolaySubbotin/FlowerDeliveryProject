@@ -1,0 +1,15 @@
+{% extends 'main/layoute.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Оформление заказа</h2>
+
+    <p>Ваш заказ на сумму <strong>{{ total_price }} руб.</strong></p>
+
+    <form method="post" action="{% url 'order_success' %}">
+        {% csrf_token %}
+
+        <button type="submit" class="btn btn-primary">Оплатить</button>
+    </form>
+</div>
+{% endblock %}

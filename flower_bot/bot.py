@@ -1,5 +1,7 @@
 import psycopg2
 import logging
+from queries import GET_ORDERS_SQL, UPDATE_STATUS_SQL
+from queries import update_order_status_in_db
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ApplicationBuilder,
@@ -8,10 +10,12 @@ from telegram.ext import (
     ContextTypes
 )
 from config import DB_CONFIG, TELEGRAM_TOKEN
+from aiogram import Bot
+from queries import get_user_telegram_id
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-
+bot = Bot(token=TELEGRAM_TOKEN)
 class Database:
     def __init__(self):
         self.conn = psycopg2.connect(**DB_CONFIG)
@@ -84,13 +88,28 @@ async def order_detail(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 
-async def update_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    action, order_id = query.data.split('_')
-    status = 'completed' if action == 'complete' else 'cancelled'
 
-    db.update_status(order_id, status)
-    await query.answer(f"Статус заказа #{order_id} изменен на {status}")
+async def update_order_status(order_id, new_status):
+    """Обновляет статус заказа и уведомляет клиента"""
+
+    # Обновляем статус заказа в БД
+    update_order_status_in_db(order_id, new_status)
+
+    # Получаем Telegram ID клиента
+    user_telegram_id = get_user_telegram_id(order_id)
+
+    if user_telegram_id:
+        status_messages = {
+            "pending": "Ваш заказ принят в обработку!",
+            "processing": "Ваш заказ готовится.",
+            "completed": "Ваш заказ доставлен! Спасибо за покупку! 🌸",
+            "canceled": "Ваш заказ был отменён. Если это ошибка, свяжитесь с нами."
+        }
+
+        message_text = status_messages.get(new_status, "Статус заказа изменён.")
+
+        # Отправляем уведомление клиенту
+        await bot.send_message(chat_id=user_telegram_id, text=message_text)
 
 
 if __name__ == "__main__":

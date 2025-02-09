@@ -1,0 +1,9 @@
+{% extends 'main/layoute.html' %}
+
+{% block content %}
+<div class="container text-center">
+    <h2 class="text-success">Заказ успешно оформлен!</h2>
+    <p>Спасибо за ваш заказ. Мы свяжемся с вами для подтверждения.</p>
+    <a href="{% url 'home' %}" class="btn btn-primary">Вернуться на главную</a>
+</div>
+{% endblock %}

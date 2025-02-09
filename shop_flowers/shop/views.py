@@ -58,7 +58,7 @@ def remove_from_cart(request, item_id):
 
 @login_required
 def order_history(request):
-    """История заказов пользователя"""
+    """История заказов"""
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'shop/order_history.html', {'orders': orders})
 
@@ -116,21 +116,36 @@ def reorder(request, order_id):
 
 @login_required
 def checkout(request):
-    """Заглушка оплаты: заказ оформляется, а корзина очищается"""
-    user = request.user
-    cart_items = CartItem.objects.filter(user=user)
+    cart_items = CartItem.objects.filter(cart__user=request.user)
 
-    if cart_items.exists():
-        # Создаём заказ
-        order = Order.objects.create(user=user, status='completed')
+    if not cart_items:
+        return redirect('cart')  # Если корзина пуста, отправляем пользователя обратно
 
-        # Добавляем в заказ все товары из корзины
+    total_price = sum(item.product.price * item.quantity for item in cart_items)
+
+    if request.method == "POST":
+        order = Order.objects.create(
+            user=request.user,
+            status="pending",  # Начальный статус заказа
+            total_price=total_price,
+            delivery_address="Адрес по умолчанию"  # Временно, можно обновить позже
+        )
+
+        # Добавляем товары в заказ
         for item in cart_items:
-            order.products.add(item.product)
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity
+            )
 
-        # Очищаем корзину
+        # Очищаем корзину после оформления заказа
         cart_items.delete()
 
-        return redirect('order_history')  # Перенаправляем в историю заказов
+        return redirect('order_success')
 
-    return redirect('cart')  # Если корзина пустая, просто возвращаемся обратно
+    return render(request, 'shop/checkout.html', {"total_price": total_price})
+
+def order_success(request):
+    """Отображает страницу успешного оформления заказа"""
+    return render(request, 'shop/order_success.html')

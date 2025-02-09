@@ -12,4 +12,5 @@ urlpatterns = [
     path('checkout/', views.checkout, name='checkout'),
     path("order-history/", views.order_history, name="order_history"),  # История заказов
     path("reorder/<int:order_id>/", views.reorder, name="reorder"),  # Повторный заказ
+    path('order_success/', views.order_success, name='order_success'),
 ]

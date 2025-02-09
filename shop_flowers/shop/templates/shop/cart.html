@@ -62,13 +62,11 @@
                     <div class="card-body">
                         <h5 class="card-title">Итого:</h5>
                         <p class="fs-4 text-danger">{{ cart.total_price|floatformat:"0" }} руб.</p>
-                        <a href="{% url 'create_order' %}" class="btn btn-success btn-lg">
-                            {% if cart_items %}
-                                <a href="{% url 'checkout' %}" class="btn btn-success">Оформить заказ</a>
-                            {% else %}
-                                <button class="btn btn-secondary" disabled>Корзина пуста</button>
-                            {% endif %}
-                        </a>
+                        {% if cart.cart_items.all %}
+                            <a href="{% url 'checkout' %}" class="btn btn-success btn-lg">Оформить заказ</a>
+                        {% else %}
+                            <button class="btn btn-secondary" disabled>Корзина пуста</button>
+                        {% endif %}
                     </div>
                 </div>
             </div>
