@@ -2,7 +2,7 @@ from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Cart, CartItem, Order, OrderItem, Product
+from .models import Cart, CartItem, Order, OrderItem
 from .forms import CartAddForm
 from flowers.models import Bouquet
 
@@ -32,8 +32,8 @@ def cart_view(request):
     return render(request, 'shop/cart.html', {'cart': cart})
 
 @login_required
-def add_to_cart(request, product_id):
-    bouquet = get_object_or_404(Bouquet, id=product_id)
+def add_to_cart(request, bouquet_id):
+    bouquet = get_object_or_404(Bouquet, id=bouquet_id)
     cart, created = Cart.objects.get_or_create(user=request.user)
     cart_item, item_created = CartItem.objects.get_or_create(
         cart=cart,
@@ -59,24 +59,25 @@ def remove_from_cart(request, item_id):
 @login_required
 def order_history(request):
     """История заказов"""
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    orders = Order.objects.filter(user=request.user).prefetch_related('items')
     return render(request, 'shop/order_history.html', {'orders': orders})
 
 @login_required
 def create_order(request):
-    """Оформление заказа из корзины"""
     try:
-        cart = Cart.objects.get(user=request.user)
+        with transaction.atomic():  # Для атомарности операции
+            # Получаем корзину пользователя
+            cart = get_object_or_404(Cart, user=request.user)
 
-        if not cart.cart_items.exists():
-            messages.warning(request, "Ваша корзина пуста!")
-            return redirect('cart')
+            if not cart.cart_items.exists():
+                messages.warning(request, "Ваша корзина пуста!")
+                return redirect('cart')
 
-        with transaction.atomic():
             # Создаем заказ
             order = Order.objects.create(
                 user=request.user,
-                delivery_address=request.user.address  # Используем адрес из профиля
+                delivery_address=request.user.address,
+                status='new'
             )
 
             # Переносим товары из корзины в заказ
@@ -91,10 +92,10 @@ def create_order(request):
             cart.cart_items.all().delete()
 
             messages.success(request, f"Заказ №{order.id} успешно оформлен!")
-            return redirect('order_detail', order_id=order.id)
+            return redirect('order_success')
 
-    except Cart.DoesNotExist:
-        messages.error(request, "Корзина не найдена")
+    except Exception as e:
+        messages.error(request, f"Ошибка при оформлении заказа: {str(e)}")
         return redirect('cart')
 
 
