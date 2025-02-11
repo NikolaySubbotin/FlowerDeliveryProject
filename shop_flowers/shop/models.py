@@ -69,6 +69,12 @@ class Order(models.Model):
         auto_now_add=True,
         verbose_name='Дата создания'
     )
+    total_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,  # Установи значение по умолчанию
+        verbose_name='Общая сумма'
+    )
 
     class Meta:
         verbose_name = 'Заказ'
@@ -77,13 +83,12 @@ class Order(models.Model):
     def __str__(self):
         return f"Заказ {self.id} - {self.user.username}"
 
-    @property
-    def total_price(self):
+    def update_total_price(self):
         """
-        Возвращает общую стоимость заказа, суммируя все элементы.
-        Использует агрегацию для оптимизации запроса к базе данных.
+        Пересчитывает общую стоимость заказа и сохраняет ее в БД.
         """
-        return sum(item.total_price for item in self.items.all())
+        self.total_price = sum(item.total_price() for item in self.items.all())
+        self.save()
 
 
 class OrderItem(models.Model):

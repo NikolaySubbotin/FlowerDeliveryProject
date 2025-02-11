@@ -1,6 +1,6 @@
-import psycopg2
+import sqlite3
 import logging
-from queries import GET_ORDERS_SQL, UPDATE_STATUS_SQL
+from queries import GET_ORDERS_SQL, UPDATE_STATUS_SQL, DB_PATH
 from queries import update_order_status_in_db
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -18,21 +18,27 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 bot = Bot(token=TELEGRAM_TOKEN)
 class Database:
     def __init__(self):
-        self.conn = psycopg2.connect(**DB_CONFIG)
+        self.conn = sqlite3.connect(DB_PATH)
+        self.cur = self.conn.cursor()
 
     def get_orders(self):
-        with self.conn.cursor() as cursor:
-            cursor.execute(GET_ORDERS_SQL)
-            return cursor.fetchall()
+        self.cur.execute(GET_ORDERS_SQL)
+        return self.cur.fetchall()
 
     def update_status(self, order_id, status):
-        with self.conn.cursor() as cursor:
-            cursor.execute(UPDATE_STATUS_SQL, (status, order_id))
-            self.conn.commit()
+        self.cur.execute(UPDATE_STATUS_SQL, (status, order_id))
+        self.conn.commit()
 
 
 db = Database()
 
+async def update_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    order_id = query.data.split('_')[1]
+    new_status = "completed" if "complete" in query.data else "canceled"
+
+    await update_order_status(order_id, new_status)
+    await query.answer("Статус заказа обновлён!")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(

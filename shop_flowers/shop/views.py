@@ -117,35 +117,34 @@ def reorder(request, order_id):
 
 @login_required
 def checkout(request):
-    cart_items = CartItem.objects.filter(cart__user=request.user)
+    cart = get_object_or_404(Cart, user=request.user)
+    cart_items = cart.items.all()
 
     if not cart_items:
-        return redirect('cart')  # Если корзина пуста, отправляем пользователя обратно
+        return redirect('cart')  # Если корзина пуста, перенаправляем назад
 
-    total_price = sum(item.product.price * item.quantity for item in cart_items)
+    # Создаем заказ
+    order = Order.objects.create(
+        user=request.user,
+        delivery_address="Указать адрес при оформлении",
+        status='new'
+    )
 
-    if request.method == "POST":
-        order = Order.objects.create(
-            user=request.user,
-            status="pending",  # Начальный статус заказа
-            total_price=total_price,
-            delivery_address="Адрес по умолчанию"  # Временно, можно обновить позже
+    # Копируем товары из корзины в заказ
+    for item in cart_items:
+        OrderItem.objects.create(
+            order=order,
+            product=item.product,
+            quantity=item.quantity
         )
 
-        # Добавляем товары в заказ
-        for item in cart_items:
-            OrderItem.objects.create(
-                order=order,
-                product=item.product,
-                quantity=item.quantity
-            )
+    # Пересчитываем и сохраняем общую сумму заказа
+    order.update_total_price()
 
-        # Очищаем корзину после оформления заказа
-        cart_items.delete()
+    # Очищаем корзину после оформления заказа
+    cart.items.all().delete()
 
-        return redirect('order_success')
-
-    return render(request, 'shop/checkout.html', {"total_price": total_price})
+    return redirect('order_success')  # Перенаправляем на страницу успешного заказа
 
 def order_success(request):
     """Отображает страницу успешного оформления заказа"""
