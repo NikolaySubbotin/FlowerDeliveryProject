@@ -34,7 +34,7 @@ SELECT
     u.phone, 
     o.delivery_address, 
     o.status, 
-    GROUP_CONCAT(p.name, ', ') as products 
+    p.name
 FROM 
     shop_order o
 JOIN 
@@ -43,7 +43,7 @@ JOIN
     shop_orderitem oi ON o.id = oi.order_id
 JOIN 
     flowers_bouquet p ON oi.product_id = p.id
-GROUP BY 
+ORDER BY 
     o.id;
 """
 

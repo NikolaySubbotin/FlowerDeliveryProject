@@ -118,7 +118,7 @@ def reorder(request, order_id):
 @login_required
 def checkout(request):
     cart = get_object_or_404(Cart, user=request.user)
-    cart_items = cart.items.all()
+    cart_items = cart.cart_items.all()
 
     if not cart_items:
         return redirect('cart')  # Если корзина пуста, перенаправляем назад
@@ -142,7 +142,7 @@ def checkout(request):
     order.update_total_price()
 
     # Очищаем корзину после оформления заказа
-    cart.items.all().delete()
+    cart.cart_items.all().delete()
 
     return redirect('order_success')  # Перенаправляем на страницу успешного заказа
 

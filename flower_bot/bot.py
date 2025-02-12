@@ -23,7 +23,22 @@ class Database:
 
     def get_orders(self):
         self.cur.execute(GET_ORDERS_SQL)
-        return self.cur.fetchall()
+        orders = self.cur.fetchall()
+
+        order_dict = {}
+        for order in orders:
+            order_id = order[0]
+            if order_id not in order_dict:
+                order_dict[order_id] = {
+                    "id": order[0],
+                    "phone": order[1],
+                    "address": order[2],
+                    "status": order[3],
+                    "products": []
+                }
+            order_dict[order_id]["products"].append(order[4])
+
+        return list(order_dict.values())
 
     def update_status(self, order_id, status):
         self.cur.execute(UPDATE_STATUS_SQL, (status, order_id))
@@ -34,11 +49,14 @@ db = Database()
 
 async def update_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    order_id = query.data.split('_')[1]
+    order_id = int(query.data.split('_')[1])
     new_status = "completed" if "complete" in query.data else "canceled"
 
-    await update_order_status(order_id, new_status)
+    db.update_status(order_id, new_status)
     await query.answer("Статус заказа обновлён!")
+
+    # Обновляем сообщение
+    await order_detail(update, context)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -52,11 +70,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def show_orders(update: Update, context: ContextTypes.DEFAULT_TYPE):
     orders = db.get_orders()
 
+    if not orders:
+        await update.message.reply_text("❌ Заказов пока нет.")
+        return
+
     keyboard = []
     for order in orders:
         btn = InlineKeyboardButton(
-            f"Заказ #{order[0]} ({order[3]})",
-            callback_data=f"order_{order[0]}"
+            f"Заказ #{order['id']} ({order['status']})",
+            callback_data=f"order_{order['id']}"
         )
         keyboard.append([btn])
 
@@ -68,19 +90,18 @@ async def show_orders(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def order_detail(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    order_id = query.data.split('_')[1]
+    order_id = int(query.data.split('_')[1])
 
-    # Получаем данные заказа из БД
     orders = db.get_orders()
-    order = next((o for o in orders if o[0] == int(order_id)), None)
+    order = next((o for o in orders if o["id"] == order_id), None)
 
     if order:
         text = (
-            f"🛍️ Заказ #{order[0]}\n"
-            f"📞 Телефон: {order[1]}\n"
-            f"🏠 Адрес: {order[2]}\n"
-            f"📦 Статус: {order[3]}\n"
-            f"🌸 Товары: {', '.join(order[4])}"
+            f"🛍️ Заказ #{order['id']}\n"
+            f"📞 Телефон: {order['phone']}\n"
+            f"🏠 Адрес: {order['address']}\n"
+            f"📦 Статус: {order['status']}\n"
+            f"🌸 Товары: {', '.join(order['products'])}"
         )
 
         keyboard = [
