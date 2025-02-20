@@ -9,9 +9,10 @@ from telegram.ext import (
     CallbackQueryHandler,
     ContextTypes
 )
-from config import DB_CONFIG, TELEGRAM_TOKEN
+from config import DB_PATH, TELEGRAM_TOKEN
 from aiogram import Bot
 from queries import get_user_telegram_id
+
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 

@@ -19,7 +19,7 @@ class Cart(models.Model):
         verbose_name_plural = 'Корзины'
 
     def total_price(self):
-        return sum(item.total_price() for item in self.cart_items.all())
+        return sum(item.product.price * item.quantity for item in self.items.all())
 
 class CartItem(models.Model):
     cart = models.ForeignKey(
