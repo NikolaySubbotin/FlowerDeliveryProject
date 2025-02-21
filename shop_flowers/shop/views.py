@@ -27,9 +27,10 @@ def order_detail(request, order_id):
 def cart_view(request):
     # Получаем корзину текущего пользователя или создаем новую
     cart, created = Cart.objects.get_or_create(user=request.user)
+    items = cart.cart_items.all()
 
     # Передаем корзину в шаблон
-    return render(request, 'shop/cart.html', {'cart': cart})
+    return render(request, 'shop/cart.html', {'cart': cart, 'items': items})
 
 @login_required
 def add_to_cart(request, bouquet_id):
