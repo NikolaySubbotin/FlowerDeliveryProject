@@ -1,4 +1,5 @@
 import sqlite3
+from config import DB_PATH
 
 DB_PATH = "your_database.db"
 
@@ -35,6 +36,7 @@ SELECT
     o.delivery_address, 
     o.status, 
     p.name
+    o.total_price
 FROM 
     shop_order o
 JOIN 

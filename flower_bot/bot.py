@@ -12,6 +12,7 @@ from telegram.ext import (
 from config import DB_PATH, TELEGRAM_TOKEN
 from aiogram import Bot
 from queries import get_user_telegram_id
+from datetime import datetime
 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -35,6 +36,7 @@ class Database:
                     "phone": order[1],
                     "address": order[2],
                     "status": order[3],
+                    "total_price": order[5],
                     "products": []
                 }
             order_dict[order_id]["products"].append(order[4])
@@ -43,6 +45,15 @@ class Database:
 
     def update_status(self, order_id, status):
         self.cur.execute(UPDATE_STATUS_SQL, (status, order_id))
+        self.conn.commit()
+
+    def add_order(self, user_id, status, delivery_address, total_price):
+        """Добавляет заказ в базу данных"""
+        created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Добавляем текущее время
+        self.cur.execute(
+            "INSERT INTO shop_order (user_id, status, delivery_address, total_price, created_at) VALUES (?, ?, ?, ?, ?)",
+            (user_id, status, delivery_address, total_price, created_at),
+        )
         self.conn.commit()
 
 
