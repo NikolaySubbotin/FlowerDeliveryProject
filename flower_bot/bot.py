@@ -20,12 +20,15 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 bot = Bot(token=TELEGRAM_TOKEN)
 class Database:
     def __init__(self):
+        print(f"📂 Подключение к базе: {DB_PATH}")  # Проверяем путь к базе
         self.conn = sqlite3.connect(DB_PATH)
         self.cur = self.conn.cursor()
 
     def get_orders(self):
         self.cur.execute(GET_ORDERS_SQL)
         orders = self.cur.fetchall()
+        print(f"Найденные заказы: {orders}")
+
 
         order_dict = {}
         for order in orders:
@@ -41,6 +44,14 @@ class Database:
                 }
             order_dict[order_id]["products"].append(order[4])
 
+        self.cur.execute("SELECT * FROM shop_orderitem;")
+        order_items = self.cur.fetchall()
+        print("📦 Все записи в shop_orderitem:", order_items)  # Проверяем содержимое
+
+        self.cur.execute(GET_ORDERS_SQL)
+        orders = self.cur.fetchall()
+        print("🔍 Найденные заказы через SQL:", orders)  # Смотрим, что вернул запрос
+
         return list(order_dict.values())
 
     def update_status(self, order_id, status):
@@ -54,7 +65,27 @@ class Database:
             "INSERT INTO shop_order (user_id, status, delivery_address, total_price, created_at) VALUES (?, ?, ?, ?, ?)",
             (user_id, status, delivery_address, total_price, created_at),
         )
+        order_id = self.cur.lastrowid  # ⚡ Получаем ID только что добавленного заказа
         self.conn.commit()
+        return order_id  # ⬅️ Возвращаем ID для привязки к `shop_orderitem`
+
+        self.conn.commit()
+        print("✅ Успешно добавлен заказ!")  # Отладочный вывод
+        print(f"Добавлен заказ: {user_id}, {status}, {delivery_address}, {total_price}")
+
+        # 🟢 ПРОВЕРЯЕМ, что заказ действительно в базе!
+        self.cur.execute("SELECT * FROM shop_order;")
+        orders = self.cur.fetchall()
+        print("📋 Все заказы в базе после добавления:", orders)
+
+    def add_order_item(self, order_id, product_id, quantity):
+        """Добавляет товар в заказ"""
+        self.cur.execute(
+            "INSERT INTO shop_orderitem (order_id, product_id, quantity) VALUES (?, ?, ?)",
+            (order_id, product_id, quantity)
+        )
+        self.conn.commit()
+
 
 
 db = Database()
@@ -150,8 +181,20 @@ async def update_order_status(order_id, new_status):
         # Отправляем уведомление клиенту
         await bot.send_message(chat_id=user_telegram_id, text=message_text)
 
+def check_orders():
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM shop_order;")  # Проверяем заказы
+    orders = cur.fetchall()
+    conn.close()
+
+    print("📋 Список заказов в базе:")
+    for order in orders:
+        print(order)
+
 
 if __name__ == "__main__":
+    check_orders()
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))

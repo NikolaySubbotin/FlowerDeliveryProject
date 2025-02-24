@@ -35,9 +35,10 @@ SELECT
     u.phone, 
     o.delivery_address, 
     o.status, 
-    p.name
+    p.name,
     o.total_price
 FROM 
+
     shop_order o
 JOIN 
     main_customuser u ON o.user_id = u.id
