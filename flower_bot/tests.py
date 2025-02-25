@@ -10,6 +10,8 @@ class BotDatabaseTest(unittest.TestCase):
 
     def test_insert_order(self):
         self.db.add_order(user_id=1, status="new", delivery_address="ул. Ленина, 5", total_price=1000)
+        self.db.cur.execute("SELECT * FROM shop_order;")
+        print("📋 Все заказы в базе:", self.db.cur.fetchall())
         self.db.conn.commit()  # Принудительно фиксируем изменения
         orders = self.db.get_orders()
 

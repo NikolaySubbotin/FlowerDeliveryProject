@@ -30,6 +30,7 @@ class Database:
         print(f"Найденные заказы: {orders}")
 
 
+
         order_dict = {}
         for order in orders:
             order_id = order[0]

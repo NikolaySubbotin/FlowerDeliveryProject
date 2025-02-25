@@ -35,17 +35,18 @@ SELECT
     u.phone, 
     o.delivery_address, 
     o.status, 
-    p.name,
+    GROUP_CONCAT(p.name) AS products,
     o.total_price
 FROM 
-
     shop_order o
 JOIN 
     main_customuser u ON o.user_id = u.id
-JOIN 
+LEFT JOIN 
     shop_orderitem oi ON o.id = oi.order_id
-JOIN 
+LEFT JOIN 
     flowers_bouquet p ON oi.product_id = p.id
+GROUP BY 
+    o.id
 ORDER BY 
     o.id;
 """
