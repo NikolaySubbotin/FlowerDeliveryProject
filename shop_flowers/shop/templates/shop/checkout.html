@@ -9,7 +9,28 @@
     <form method="post" action="{% url 'order_success' %}">
         {% csrf_token %}
 
+        <div class="mb-3">
+            <label for="city" class="form-label">Город</label>
+            <input type="text" class="form-control" id="city" name="city" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="street" class="form-label">Улица</label>
+            <input type="text" class="form-control" id="street" name="street" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="house_number" class="form-label">Номер дома</label>
+            <input type="text" class="form-control" id="house_number" name="house_number" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="apartment_number" class="form-label">Номер квартиры</label>
+            <input type="text" class="form-control" id="apartment_number" name="apartment_number">
+        </div>
+
         <button type="submit" class="btn btn-primary">Оплатить</button>
     </form>
 </div>
 {% endblock %}
+

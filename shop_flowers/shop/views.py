@@ -60,7 +60,9 @@ def remove_from_cart(request, item_id):
 @login_required
 def order_history(request):
     """История заказов"""
-    orders = Order.objects.filter(user=request.user).prefetch_related('items')
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    print(f"Найденные заказы: {list(orders)}")  # Дебаг
+
     return render(request, 'shop/order_history.html', {'orders': orders})
 
 @login_required
@@ -93,6 +95,8 @@ def create_order(request):
             cart.cart_items.all().delete()
 
             messages.success(request, f"Заказ №{order.id} успешно оформлен!")
+
+            print(f"Создан заказ: {order.id}, {order.user}, {order.status}, {order.total_price}")
             return redirect('order_success')
 
     except Exception as e:
@@ -118,34 +122,47 @@ def reorder(request, order_id):
 
 @login_required
 def checkout(request):
-    cart = get_object_or_404(Cart, user=request.user)
-    cart_items = cart.cart_items.all()
+    cart = Cart.objects.get(user=request.user)
+    cart_items = CartItem.objects.filter(cart=cart)
 
-    if not cart_items:
-        return redirect('cart')  # Если корзина пуста, перенаправляем назад
+    if request.method == "POST":
+        city = request.POST.get("city")
+        street = request.POST.get("street")
+        house_number = request.POST.get("house_number")
+        apartment_number = request.POST.get("apartment_number")
 
-    # Создаем заказ
-    order = Order.objects.create(
-        user=request.user,
-        delivery_address="Указать адрес при оформлении",
-        status='new'
-    )
+        if not city or not street or not house_number:
+            messages.error(request, "Заполните все поля доставки")
+            return redirect("checkout")
 
-    # Копируем товары из корзины в заказ
-    for item in cart_items:
-        OrderItem.objects.create(
-            order=order,
-            product=item.product,
-            quantity=item.quantity
+        order = Order.objects.create(
+            user=request.user,
+            city=city,
+            street=street,
+            house_number=house_number,
+            apartment_number=apartment_number if apartment_number else "",
+            status="pending",
         )
 
-    # Пересчитываем и сохраняем общую сумму заказа
-    order.update_total_price()
+        total_price = 0
+        for item in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity
+            )
+            total_price += item.product.price * item.quantity
 
-    # Очищаем корзину после оформления заказа
-    cart.cart_items.all().delete()
+        order.total_price = total_price
+        order.save()
 
-    return redirect('order_success')  # Перенаправляем на страницу успешного заказа
+        cart_items.delete()  # Очистка корзины
+        print("ЗАКАЗ УСПЕШНО ОФОРМЛЕН!")
+
+        return redirect("order_success")
+
+    return render(request, "shop/checkout.html", {"cart": cart})
+
 
 def order_success(request):
     """Отображает страницу успешного оформления заказа"""

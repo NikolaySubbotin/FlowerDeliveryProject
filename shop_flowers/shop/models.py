@@ -56,19 +56,19 @@ class Order(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        verbose_name='Пользователь'
+        verbose_name="Пользователь"
     )
-    delivery_address = models.TextField(verbose_name='Адрес доставки')
+    city = models.CharField(max_length=100, verbose_name="Город", default="Не указано")
+    street = models.CharField(max_length=255, verbose_name="Улица", default="Не указано")
+    house_number = models.CharField(max_length=10, verbose_name="Номер дома", default="—")
+    apartment_number = models.CharField(max_length=10, blank=True, null=True, verbose_name="Номер квартиры")
     status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='new',
-        verbose_name='Статус'
+        max_length=50,
+        choices=[('new', 'Новый'), ('processing', 'В обработке'), ('completed', 'Доставлен'), ('canceled', 'Отменен')],
+        default='new'
     )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Дата создания'
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата заказа")
+
     total_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
