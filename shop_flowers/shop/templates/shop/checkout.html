@@ -6,7 +6,7 @@
 
     <p>Ваш заказ на сумму <strong>{{ total_price }} руб.</strong></p>
 
-    <form method="post" action="{% url 'order_success' %}">
+     <form method="post" action="{% url 'checkout' %}">
         {% csrf_token %}
 
         <div class="mb-3">
